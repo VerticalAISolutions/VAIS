@@ -120,18 +120,47 @@ body {
 </div>
 
 <script>
-  const letter = document.querySelector(".letter");
+  const letterElements = document.querySelectorAll(".letter");
   const backgroundShapes = document.querySelector(".background-shapes");
   const numShapes = 50; // Adjust for density
   const word = document.querySelector(".word");
-  // Mouse move effect
-  word.addEventListener("mousemove", (e) => {
+
+
+// Mouse move effect on word
+word.addEventListener("mousemove", (e) => {
     const x = e.clientX / 100;
     const y = e.clientY / 100;
 
-      word.style.transform = `translate(${x}px, ${y}px)`;
+    word.style.transform = `translate(${x}px, ${y}px)`;
+});
 
-  })
+  // Original letter animation on hover
+
+letterElements.forEach(letter => {
+    letter.addEventListener('mousemove', function(event) {
+        const rect = letter.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        const dx = event.clientX - centerX;
+        const dy = event.clientY - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 100) {
+            const scale = 1 + (100 - distance) * 0.005;
+            const translateX = dx * 0.05;
+            const translateY = dy * 0.05;
+
+            letter.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        } else {
+            letter.style.transform = 'translateY(0px)'; // Remove translation, not the entire transform
+        }
+    });
+
+    letter.addEventListener('mouseout', function() {
+        letter.style.transform = 'translateY(0px)'; // Reset on mouseout too
+    });
+});
 
   for (let i = 0; i < numShapes; i++) {
       const shape = document.createElement('div');
