@@ -1,93 +1,92 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Interactive Text</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <title>Interactive Text</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
 
-<style>
-body {
-    margin: 0;
-    overflow: hidden;
-    background: #f4f8f2; /* Muted greenish background */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: 'Poppins', sans-serif; /* Use Poppins font */
-    position: relative; /* Needed for absolute positioning of the shapes */
-}
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #f4f8f2; /* Muted greenish background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Poppins', sans-serif; /* Use Poppins font */
+            position: relative; /* Needed for absolute positioning of the shapes */
+        }
 
-.word {
-    display: flex;
-    z-index: 2; /* Ensure text is above the shapes */
-    position: relative; /* Required for mousemove effect */
-}
+        .word {
+            display: flex;
+            z-index: 2; /* Ensure text is above the shapes */
+            position: relative; /* Required for mousemove effect */
+        }
 
-.letter {
-    font-size: 4em; /* Adjust size */
-    font-weight: 300; /* Thin typeface */
-    color: #558b2f; /* Light green text color */
-    transition: transform 0.2s ease, color 0.2s ease; /* Smooth animation */
-    margin: 0 0.1em;
-    position: relative;
-    animation: subtleMovement 3s infinite alternate; /* Constant letter movement */
-}
+        .letter {
+            font-size: 4em; /* Adjust size */
+            font-weight: 300; /* Thin typeface */
+            color: #558b2f; /* Light green text color */
+            transition: transform 0.2s ease, color 0.2s ease; /* Smooth animation */
+            margin: 0 0.1em;
+            position: relative;
+            animation: subtleMovement 3s infinite alternate; /* Constant letter movement */
+            display: inline-block;  /* Important: needed for individual letter transformations */
+        }
 
-@keyframes subtleMovement {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-3px); } /* Small vertical movement */
-}
+        @keyframes subtleMovement {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-3px); } /* Small vertical movement */
+        }
 
-/* Style for the container of the background shapes */
-.background-shapes {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden; /* Hide shapes outside the container */
-    z-index: 1; /* Place the shapes behind the text */
-}
+        /* Style for the container of the background shapes */
+        .background-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Hide shapes outside the container */
+            z-index: 1; /* Place the shapes behind the text */
+        }
 
-.vertical-shape {
-    position: absolute;
-    width: 5px; /* Tiny shapes */
-    height: 20px; /* Tiny shapes */
-    background: linear-gradient(to bottom, #a5d6a7, #dcedc8); /* Gradient */
-    opacity: 0.5;
-    border-radius: 2px;
-    animation: moveShapes 20s linear infinite, pulse 5s infinite alternate;
-    /* Random starting position */
-    left: calc(var(--random-x) * 100%);
-    top: calc(var(--random-y) * 100%);
-}
+        .vertical-shape {
+            position: absolute;
+            width: 5px; /* Tiny shapes */
+            height: 20px; /* Tiny shapes */
+            background: linear-gradient(to bottom, #a5d6a7, #dcedc8); /* Gradient */
+            opacity: 0.5;
+            border-radius: 2px;
+            animation: moveShapes 20s linear infinite, pulse 5s infinite alternate;
+            /* Random starting position */
+            left: calc(var(--random-x) * 100%);
+            top: calc(var(--random-y) * 100%);
+        }
 
-/* Added variables for left and top positions */
-.vertical-shape {
-  --random-x: 0;
-  --random-y: 0;
-}
+        /* Added variables for left and top positions */
+        .vertical-shape {
+            --random-x: 0;
+            --random-y: 0;
+        }
 
-@keyframes pulse {
-    0% {
-        opacity: 0.3;
-        transform: scale(1);
-    }
-    100% {
-        opacity: 0.7;
-        transform: scale(1.05); /* Slightly larger */
-    }
-}
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.7;
+                transform: scale(1.05); /* Slightly larger */
+            }
+        }
 
-@keyframes moveShapes {
-  0% {transform: translateY(0px);}
-  100% {transform: translateY(100vh);}
-}
-
-
-</style>
+        @keyframes moveShapes {
+            0% { transform: translateY(-20px); } /* Start above the viewport */
+            100% { transform: translateY(100vh); }
+        }
+    </style>
 </head>
 <body>
 
@@ -120,60 +119,57 @@ body {
 </div>
 
 <script>
-  const letterElements = document.querySelectorAll(".letter");
-  const backgroundShapes = document.querySelector(".background-shapes");
-  const numShapes = 50; // Adjust for density
-  const word = document.querySelector(".word");
+    const letterElements = document.querySelectorAll(".letter");
+    const backgroundShapes = document.querySelector(".background-shapes");
+    const numShapes = 50; // Adjust for density
+    const word = document.querySelector(".word");
 
+    // Mouse move effect on word
+    word.addEventListener("mousemove", (e) => {
+        const x = e.clientX / 100;
+        const y = e.clientY / 100;
 
-// Mouse move effect on word
-word.addEventListener("mousemove", (e) => {
-    const x = e.clientX / 100;
-    const y = e.clientY / 100;
-
-    word.style.transform = `translate(${x}px, ${y}px)`;
-});
-
-  // Original letter animation on hover
-
-letterElements.forEach(letter => {
-    letter.addEventListener('mousemove', function(event) {
-        const rect = letter.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        const dx = event.clientX - centerX;
-        const dy = event.clientY - centerY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance < 100) {
-            const scale = 1 + (100 - distance) * 0.005;
-            const translateX = dx * 0.05;
-            const translateY = dy * 0.05;
-
-            letter.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-        } else {
-            letter.style.transform = 'translateY(0px)'; // Remove translation, not the entire transform
-        }
+        word.style.transform = `translate(${x}px, ${y}px)`;
     });
 
-    letter.addEventListener('mouseout', function() {
-        letter.style.transform = 'translateY(0px)'; // Reset on mouseout too
+    // Original letter animation on hover
+    letterElements.forEach(letter => {
+        letter.addEventListener('mousemove', function(event) {
+            const rect = letter.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const dx = event.clientX - centerX;
+            const dy = event.clientY - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 100) {
+                const scale = 1 + (100 - distance) * 0.005;
+                const translateX = dx * 0.05;
+                const translateY = dy * 0.05;
+
+                letter.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+            } else {
+                // Reset only the translation, keep scale 1
+                letter.style.transform = `translate(0, 0) scale(1)`;
+            }
+        });
+
+        letter.addEventListener('mouseout', function() {
+            letter.style.transform = `translate(0, 0) scale(1)`; // Reset on mouseout too
+        });
     });
-});
 
-  for (let i = 0; i < numShapes; i++) {
-      const shape = document.createElement('div');
-      shape.classList.add('vertical-shape');
+    for (let i = 0; i < numShapes; i++) {
+        const shape = document.createElement('div');
+        shape.classList.add('vertical-shape');
 
-      // Assign random positions using CSS variables
-      shape.style.setProperty('--random-x', Math.random());
-      shape.style.setProperty('--random-y', Math.random());
+        // Assign random positions using CSS variables
+        shape.style.setProperty('--random-x', Math.random());
+        shape.style.setProperty('--random-y', Math.random());
 
-
-      backgroundShapes.appendChild(shape);
-  }
-
+        backgroundShapes.appendChild(shape);
+    }
 </script>
 
 </body>
