@@ -1,51 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Mouse Follower</title>
+<title>Interactive Text</title>
 <style>
-body { margin: 0; overflow: hidden; background: #111; }
-canvas { display: block; }
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.word {
+    display: flex;
+}
+
+.letter {
+    font-size: 4em;
+    color: white;
+    transition: transform 0.2s ease; /* Smooth animation */
+    margin: 0 0.1em;
+}
 </style>
 </head>
 <body>
-<canvas id="myCanvas"></canvas>
+<div class="word">
+    <span class="letter">H</span>
+    <span class="letter">e</span>
+    <span class="letter">l</span>
+    <span class="letter">l</span>
+    <span class="letter">o</span>
+</div>
 <script>
-const canvas = document.getElementById('myCanvas');
-const ctx = canvas.getContext('2d');
+const letters = document.querySelectorAll('.letter');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+document.addEventListener('mousemove', function(event) {
+    letters.forEach(letter => {
+        const rect = letter.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
-let mouseX = 0;
-let mouseY = 0;
-let circleX = canvas.width / 2; // Initial position
-let circleY = canvas.height / 2;
-const circleRadius = 30;
-const easing = 0.005;  // Adjust for smoothness
+        const dx = event.clientX - centerX;
+        const dy = event.clientY - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-window.addEventListener('mousemove', function(event) {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
+        // Adjust the distance threshold and movement amount
+        if (distance < 100) {
+            const scale = 1 + (100 - distance) * 0.005; // Scale based on proximity
+            const translateX = dx * 0.1;  // Adjust these for sensitivity.
+            const translateY = dy * 0.1;
+            letter.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        } else {
+            letter.style.transform = 'translate(0, 0) scale(1)'; // Reset
+        }
+    });
 });
-
-function animate() {
-    requestAnimationFrame(animate);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Easing equation
-    let dx = mouseX - circleX;
-    let dy = mouseY - circleY;
-    circleX += dx * easing;
-    circleY += dy * easing;
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.beginPath();
-    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.fill();
-}
-
-animate();
 </script>
 </body>
 </html>
