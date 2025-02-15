@@ -17,7 +17,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let particles = [];
-const numParticles = 500; // Adjust for performance
+const numParticles = 5000; // Adjust for performance
 
 function Particle(x, y) {
     this.x = x;
@@ -34,7 +34,7 @@ Particle.prototype.update = function() {
 
     // Bounce off edges
     if (this.x < 0 || this.x > canvas.width)  this.speedX *= -1;
-    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    if (this.y < 0 || this.y > canvas.height) this.speedY *= -3;
 
     // Mouse interaction (repulsion)
     let dx = mouse.x - this.x;
