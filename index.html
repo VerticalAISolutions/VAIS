@@ -2,15 +2,21 @@
 <html>
 <head>
 <title>Interactive Text</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
 body {
     margin: 0;
     overflow: hidden;
-    background: #111;
+    background: #f4f8f2; /* Muted greenish background */
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    font-family: 'Poppins', sans-serif; /* Use Poppins font */
+    position: relative; /* Needed for absolute positioning of the shape */
 }
 
 .word {
@@ -18,20 +24,63 @@ body {
 }
 
 .letter {
-    font-size: 4em;
-    color: white;
-    transition: transform 0.2s ease; /* Smooth animation */
+    font-size: 4em; /* Adjust size */
+    font-weight: 600; /* semi-bold */
+    color: #558b2f; /* Light green text color */
+    transition: transform 0.2s ease, color 0.2s ease; /* Smooth animation */
     margin: 0 0.1em;
+    position: relative;
+    z-index: 2; /* Ensure text is above the shape */
+}
+
+.vertical-shape {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%); /* Center the shape */
+    width: 100px; /* Adjust width */
+    height: 100%; /* Full height */
+    background: linear-gradient(to bottom, #a5d6a7, #dcedc8); /* Gradient */
+    opacity: 0.5; /* Semi-transparent */
+    border-radius: 0 0 50px 50px; /* Rounded bottom corners */
+    z-index: 1; /* Place the shape behind the text */
+    animation: pulse 5s infinite alternate; /* Add pulse animation */
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.3;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        opacity: 0.7;
+        transform: translateX(-50%) scale(1.05); /* Slightly larger */
+    }
 }
 </style>
 </head>
 <body>
+<div class="vertical-shape"></div> <!-- The animated shape -->
 <div class="word">
-    <span class="letter">H</span>
+    <span class="letter">V</span>
     <span class="letter">e</span>
-    <span class="letter">l</span>
-    <span class="letter">l</span>
+    <span class="letter">r</span>
+    <span class="letter">t</span>
+    <span class="letter">i</span>
+    <span class="letter">c</span>
+    <span class="letter">a</span>
+    <span class="letter"> </span> <!-- Space -->
+    <span class="letter">A</span>
+    <span class="letter">I</span>
+    <span class="letter"> </span> <!-- Space -->
+    <span class="letter">S</span>
     <span class="letter">o</span>
+    <span class="letter">l</span>
+    <span class="letter">u</span>
+    <span class="letter">t</span>
+    <span class="letter">i</span>
+    <span class="letter">o</span>
+    <span class="letter">n</span>
 </div>
 <script>
 const letters = document.querySelectorAll('.letter');
@@ -49,8 +98,9 @@ document.addEventListener('mousemove', function(event) {
         // Adjust the distance threshold and movement amount
         if (distance < 100) {
             const scale = 1 + (100 - distance) * 0.005; // Scale based on proximity
-            const translateX = dx * 0.1;  // Adjust these for sensitivity.
-            const translateY = dy * 0.1;
+            const translateX = dx * 0.05;  // Reduced movement sensitivity
+            const translateY = dy * 0.05;
+
             letter.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
         } else {
             letter.style.transform = 'translate(0, 0) scale(1)'; // Reset
