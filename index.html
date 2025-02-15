@@ -4,7 +4,7 @@
 <title>Interactive Text</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
 
 <style>
 body {
@@ -16,7 +16,7 @@ body {
     align-items: center;
     height: 100vh;
     font-family: 'Poppins', sans-serif; /* Use Poppins font */
-    position: relative; /* Needed for absolute positioning of the shape */
+    position: relative; /* Needed for absolute positioning of the shapes */
 }
 
 .word {
@@ -25,42 +25,65 @@ body {
 
 .letter {
     font-size: 4em; /* Adjust size */
-    font-weight: 600; /* semi-bold */
+    font-weight: 300; /* Thin typeface */
     color: #558b2f; /* Light green text color */
     transition: transform 0.2s ease, color 0.2s ease; /* Smooth animation */
     margin: 0 0.1em;
     position: relative;
     z-index: 2; /* Ensure text is above the shape */
+    animation: subtleMovement 3s infinite alternate; /* Constant letter movement */
+}
+
+@keyframes subtleMovement {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-3px); } /* Small vertical movement */
 }
 
 .vertical-shape {
     position: absolute;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%); /* Center the shape */
     width: 100px; /* Adjust width */
     height: 100%; /* Full height */
     background: linear-gradient(to bottom, #a5d6a7, #dcedc8); /* Gradient */
     opacity: 0.5; /* Semi-transparent */
     border-radius: 0 0 50px 50px; /* Rounded bottom corners */
     z-index: 1; /* Place the shape behind the text */
-    animation: pulse 5s infinite alternate; /* Add pulse animation */
+    animation: pulse 5s infinite alternate, mouseMove 10s linear infinite; /* Add pulse and mouseMove animations */
+    pointer-events: none; /* Allow mouse events to pass through */
 }
+
+/* Position the shapes randomly */
+.vertical-shape:nth-child(1) { left: 10%; }
+.vertical-shape:nth-child(2) { left: 30%; }
+.vertical-shape:nth-child(3) { left: 50%; }
+.vertical-shape:nth-child(4) { left: 70%; }
+.vertical-shape:nth-child(5) { left: 90%; }
 
 @keyframes pulse {
     0% {
         opacity: 0.3;
-        transform: translateX(-50%) scale(1);
+        transform: scale(1);
     }
     100% {
         opacity: 0.7;
-        transform: translateX(-50%) scale(1.05); /* Slightly larger */
+        transform: scale(1.05); /* Slightly larger */
     }
 }
+
+@keyframes mouseMove {
+  0% {transform: translateX(0px);}
+  100% {transform: translateX(100px);}
+}
+
 </style>
 </head>
 <body>
-<div class="vertical-shape"></div> <!-- The animated shape -->
+<div class="vertical-shape"></div>
+<div class="vertical-shape"></div>
+<div class="vertical-shape"></div>
+<div class="vertical-shape"></div>
+<div class="vertical-shape"></div>
+
 <div class="word">
     <span class="letter">V</span>
     <span class="letter">e</span>
@@ -69,10 +92,11 @@ body {
     <span class="letter">i</span>
     <span class="letter">c</span>
     <span class="letter">a</span>
-    <span class="letter"> </span> <!-- Space -->
+    <span class="letter">l</span>
+    <span class="letter"> </span>
     <span class="letter">A</span>
     <span class="letter">I</span>
-    <span class="letter"> </span> <!-- Space -->
+    <span class="letter"> </span>
     <span class="letter">S</span>
     <span class="letter">o</span>
     <span class="letter">l</span>
@@ -81,10 +105,11 @@ body {
     <span class="letter">i</span>
     <span class="letter">o</span>
     <span class="letter">n</span>
+    <span class="letter">s</span>
 </div>
 <script>
 const letters = document.querySelectorAll('.letter');
-
+/*
 document.addEventListener('mousemove', function(event) {
     letters.forEach(letter => {
         const rect = letter.getBoundingClientRect();
@@ -95,18 +120,19 @@ document.addEventListener('mousemove', function(event) {
         const dy = event.clientY - centerY;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Adjust the distance threshold and movement amount
+
         if (distance < 100) {
-            const scale = 1 + (100 - distance) * 0.005; // Scale based on proximity
-            const translateX = dx * 0.05;  // Reduced movement sensitivity
+            const scale = 1 + (100 - distance) * 0.005;
+            const translateX = dx * 0.05;
             const translateY = dy * 0.05;
 
             letter.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
         } else {
-            letter.style.transform = 'translate(0, 0) scale(1)'; // Reset
+            letter.style.transform = 'translateY(0px)'; // Reset
         }
     });
 });
+*/
 </script>
 </body>
 </html>
