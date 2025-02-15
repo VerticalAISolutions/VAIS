@@ -21,6 +21,8 @@ body {
 
 .word {
     display: flex;
+    z-index: 2; /* Ensure text is above the shapes */
+    position: relative; /* Required for mousemove effect */
 }
 
 .letter {
@@ -30,7 +32,6 @@ body {
     transition: transform 0.2s ease, color 0.2s ease; /* Smooth animation */
     margin: 0 0.1em;
     position: relative;
-    z-index: 2; /* Ensure text is above the shape */
     animation: subtleMovement 3s infinite alternate; /* Constant letter movement */
 }
 
@@ -39,25 +40,35 @@ body {
     100% { transform: translateY(-3px); } /* Small vertical movement */
 }
 
-.vertical-shape {
+/* Style for the container of the background shapes */
+.background-shapes {
     position: absolute;
     top: 0;
-    width: 100px; /* Adjust width */
-    height: 100%; /* Full height */
-    background: linear-gradient(to bottom, #a5d6a7, #dcedc8); /* Gradient */
-    opacity: 0.5; /* Semi-transparent */
-    border-radius: 0 0 50px 50px; /* Rounded bottom corners */
-    z-index: 1; /* Place the shape behind the text */
-    animation: pulse 5s infinite alternate, mouseMove 10s linear infinite; /* Add pulse and mouseMove animations */
-    pointer-events: none; /* Allow mouse events to pass through */
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Hide shapes outside the container */
+    z-index: 1; /* Place the shapes behind the text */
 }
 
-/* Position the shapes randomly */
-.vertical-shape:nth-child(1) { left: 10%; }
-.vertical-shape:nth-child(2) { left: 30%; }
-.vertical-shape:nth-child(3) { left: 50%; }
-.vertical-shape:nth-child(4) { left: 70%; }
-.vertical-shape:nth-child(5) { left: 90%; }
+.vertical-shape {
+    position: absolute;
+    width: 5px; /* Tiny shapes */
+    height: 20px; /* Tiny shapes */
+    background: linear-gradient(to bottom, #a5d6a7, #dcedc8); /* Gradient */
+    opacity: 0.5;
+    border-radius: 2px;
+    animation: moveShapes 20s linear infinite, pulse 5s infinite alternate;
+    /* Random starting position */
+    left: calc(var(--random-x) * 100%);
+    top: calc(var(--random-y) * 100%);
+}
+
+/* Added variables for left and top positions */
+.vertical-shape {
+  --random-x: 0;
+  --random-y: 0;
+}
 
 @keyframes pulse {
     0% {
@@ -70,19 +81,19 @@ body {
     }
 }
 
-@keyframes mouseMove {
-  0% {transform: translateX(0px);}
-  100% {transform: translateX(100px);}
+@keyframes moveShapes {
+  0% {transform: translateY(0px);}
+  100% {transform: translateY(100vh);}
 }
+
 
 </style>
 </head>
 <body>
-<div class="vertical-shape"></div>
-<div class="vertical-shape"></div>
-<div class="vertical-shape"></div>
-<div class="vertical-shape"></div>
-<div class="vertical-shape"></div>
+
+<div class="background-shapes">
+    <!-- Dynamically add shapes here using JavaScript -->
+</div>
 
 <div class="word">
     <span class="letter">V</span>
@@ -107,32 +118,34 @@ body {
     <span class="letter">n</span>
     <span class="letter">s</span>
 </div>
+
 <script>
-const letters = document.querySelectorAll('.letter');
-/*
-document.addEventListener('mousemove', function(event) {
-    letters.forEach(letter => {
-        const rect = letter.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+  const letter = document.querySelector(".letter");
+  const backgroundShapes = document.querySelector(".background-shapes");
+  const numShapes = 50; // Adjust for density
+  const word = document.querySelector(".word");
+  // Mouse move effect
+  word.addEventListener("mousemove", (e) => {
+    const x = e.clientX / 100;
+    const y = e.clientY / 100;
 
-        const dx = event.clientX - centerX;
-        const dy = event.clientY - centerY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+      word.style.transform = `translate(${x}px, ${y}px)`;
+
+  })
+
+  for (let i = 0; i < numShapes; i++) {
+      const shape = document.createElement('div');
+      shape.classList.add('vertical-shape');
+
+      // Assign random positions using CSS variables
+      shape.style.setProperty('--random-x', Math.random());
+      shape.style.setProperty('--random-y', Math.random());
 
 
-        if (distance < 100) {
-            const scale = 1 + (100 - distance) * 0.005;
-            const translateX = dx * 0.05;
-            const translateY = dy * 0.05;
+      backgroundShapes.appendChild(shape);
+  }
 
-            letter.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-        } else {
-            letter.style.transform = 'translateY(0px)'; // Reset
-        }
-    });
-});
-*/
 </script>
+
 </body>
 </html>
