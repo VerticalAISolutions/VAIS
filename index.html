@@ -4,15 +4,135 @@
     <meta charset="UTF-8">
     <title>Triple Synthesizer with Freesound</title>
     <style>
-        /* ... (Your existing CSS styles) ... */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #1a1a2e, #16213e, #1a1a2e);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            padding: 2rem;
+        }
+
+        .synth-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            width: 100%;
+            max-width: 1600px;
+        }
+
+        /* ... (Rest of your CSS styles) ... */
+
     </style>
 </head>
 <body>
     <div class="synth-container">
+        <div class="synth synth-1">
+            <h2 class="title">Synthesizer 1</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="frequency1">Frequenz</label>
+                    <div class="slider-container">
+                        <input type="range" id="frequency1" class="slider" min="20" max="2000" value="440">
+                    </div>
+                    <span id="frequencyValue1">440 Hz</span>
+                </div>
+                <div class="control-group">
+                    <label for="volume1">Lautstärke</label>
+                    <div class="slider-container">
+                        <input type="range" id="volume1" class="slider" min="0" max="100" value="50">
+                    </div>
+                    <span id="volumeValue1">50%</span>
+                </div>
+                <div class="control-group">
+                    <label>Wellenform</label>
+                    <div class="button-group">
+                        <button class="button active" data-wave="sine" data-synth="1">Sinus</button>
+                        <button class="button" data-wave="square" data-synth="1">Rechteck</button>
+                        <button class="button" data-wave="sawtooth" data-synth="1">Sägezahn</button>
+                        <button class="button" data-wave="triangle" data-synth="1">Dreieck</button>
+                    </div>
+                </div>
+            </div>
+            <button id="playButton1" class="button">Start/Stop</button>
+            <div class="visualizer" id="visualizer1"></div>
         </div>
 
-    <div class="freesound-section">
+        <div class="synth synth-2">
+            <h2 class="title">Synthesizer 2</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="frequency2">Frequenz</label>
+                    <div class="slider-container">
+                        <input type="range" id="frequency2" class="slider" min="20" max="2000" value="440">
+                    </div>
+                    <span id="frequencyValue2">440 Hz</span>
+                </div>
+                <div class="control-group">
+                    <label for="volume2">Lautstärke</label>
+                    <div class="slider-container">
+                        <input type="range" id="volume2" class="slider" min="0" max="100" value="50">
+                    </div>
+                    <span id="volumeValue2">50%</span>
+                </div>
+                <div class="control-group">
+                    <label>Wellenform</label>
+                    <div class="button-group">
+                        <button class="button active" data-wave="sine" data-synth="2">Sinus</button>
+                        <button class="button" data-wave="square" data-synth="2">Rechteck</button>
+                        <button class="button" data-wave="sawtooth" data-synth="2">Sägezahn</button>
+                        <button class="button" data-wave="triangle" data-synth="2">Dreieck</button>
+                    </div>
+                </div>
+            </div>
+            <button id="playButton2" class="button">Start/Stop</button>
+            <div class="visualizer" id="visualizer2"></div>
         </div>
+
+        <div class="synth synth-3">
+            <h2 class="title">Synthesizer 3</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="frequency3">Frequenz</label>
+                    <div class="slider-container">
+                        <input type="range" id="frequency3" class="slider" min="20" max="2000" value="440">
+                    </div>
+                    <span id="frequencyValue3">440 Hz</span>
+                </div>
+                <div class="control-group">
+                    <label for="volume3">Lautstärke</label>
+                    <div class="slider-container">
+                        <input type="range" id="volume3" class="slider" min="0" max="100" value="50">
+                    </div>
+                    <span id="volumeValue3">50%</span>
+                </div>
+                <div class="control-group">
+                    <label>Wellenform</label>
+                    <div class="button-group">
+                        <button class="button active" data-wave="sine" data-synth="3">Sinus</button>
+                        <button class="button" data-wave="square" data-synth="3">Rechteck</button>
+                        <button class="button" data-wave="sawtooth" data-synth="3">Sägezahn</button>
+                        <button class="button" data-wave="triangle" data-synth="3">Dreieck</button>
+                    </div>
+                </div>
+            </div>
+            <button id="playButton3" class="button">Start/Stop</button>
+            <div class="visualizer" id="visualizer3"></div>
+        </div>
+    </div>
+
+    <div class="freesound-section">
+        <h2 class="title">Freesound Samples</h2>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Suche nach Sounds (z.B. 'piano', 'drums', 'ambient')...">
+            <button class="button" id="searchButton">Suchen</button>
+        </div>
+        <div class="loader">Lade Sounds...</div>
+        <div class="sound-grid" id="soundGrid"></div>
+    </div>
 
     <script>
         class Synthesizer {
@@ -37,7 +157,7 @@
                 this.gainNode = this.audioContext.createGain();
                 this.gainNode.connect(this.analyser);
                 this.analyser.connect(this.audioContext.destination);
-                this.gainNode.gain.value = 0; // Initialize volume to 0
+                this.gainNode.gain.value = 0;
 
                 this.setupEventListeners();
                 this.drawVisualizer();
@@ -52,96 +172,7 @@
                 this.oscillator = this.audioContext.createOscillator();
                 this.oscillator.type = this.currentWaveform;
                 this.oscillator.frequency.value = document.getElementById(`frequency${this.id}`).value;
-                this.oscillator.connect(this.gainNode); // Connect to gain node
+                this.oscillator.connect(this.gainNode);
 
-                // Smooth volume transition (using exponential ramp for better perceived smoothness)
-                this.gainNode.gain.setValueAtTime(0.0001, this.audioContext.currentTime); // A tiny value to avoid zero
-                this.gainNode.gain.exponentialRampToValueAtTime(1, this.audioContext.currentTime + 0.05); // Ramp up quickly
-
-                this.oscillator.start();
-            }
-
-            setupEventListeners() {
-                const playButton = document.getElementById(`playButton${this.id}`);
-                const frequencySlider = document.getElementById(`frequency${this.id}`);
-                const volumeSlider = document.getElementById(`volume${this.id}`);
-                const frequencyValue = document.getElementById(`frequencyValue${this.id}`);
-                const volumeValue = document.getElementById(`volumeValue${this.id}`);
-                const waveButtons = document.querySelectorAll(`.synth-${this.id} .button`);
-
-                playButton.addEventListener('click', () => {
-                    this.isPlaying = !this.isPlaying;
-                    playButton.textContent = this.isPlaying ? "Stop" : "Start";
-
-                    if (this.isPlaying) {
-                        this.createOscillator();
-                    } else {
-                        this.oscillator.stop();
-                        this.oscillator.disconnect();
-                        this.oscillator = null;
-                    }
-                });
-
-                frequencySlider.addEventListener('input', () => {
-                    if (this.oscillator) {
-                        this.oscillator.frequency.value = frequencySlider.value;
-                    }
-                    frequencyValue.textContent = `${frequencySlider.value} Hz`;
-                });
-
-                volumeSlider.addEventListener('input', () => {
-                    this.gainNode.gain.value = volumeSlider.value / 100;
-                    volumeValue.textContent = `${volumeSlider.value}%`;
-                });
-
-                waveButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        waveButtons.forEach(btn => btn.classList.remove('active'));
-                        button.classList.add('active');
-                        this.currentWaveform = button.dataset.wave;
-                        if (this.isPlaying) {
-                            this.createOscillator(); // Recreate oscillator with new waveform
-                        }
-                    });
-                });
-            }
-
-            drawVisualizer() {
-                this.analyser.getByteTimeDomainData(this.dataArray);
-
-                this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.canvasCtx.beginPath();
-                const sliceWidth = this.canvas.width * 1.0 / this.bufferLength;
-                let x = 0;
-
-                for (let i = 0; i < this.bufferLength; i++) {
-                    const v = this.dataArray[i] / 128.0;
-                    const y = v * this.canvas.height / 2;
-
-                    if (i === 0) {
-                        this.canvasCtx.moveTo(x, y);
-                    } else {
-                        this.canvasCtx.lineTo(x, y);
-                    }
-
-                    x += sliceWidth;
-                }
-
-                this.canvasCtx.lineTo(this.canvas.width, this.canvas.height / 2); // Close the path
-                this.canvasCtx.strokeStyle = 'white'; // Set the color
-                this.canvasCtx.stroke();
-
-                requestAnimationFrame(() => this.drawVisualizer());
-            }
-        }
-
-
-        const synth1 = new Synthesizer(1);
-        const synth2 = new Synthesizer(2);
-        const synth3 = new Synthesizer(3);
-
-
-        // ... (Your Freesound API interaction code) ...
-    </script>
-</body>
-</html>
+                this.gainNode.gain.setValueAtTime(0.0001, this.audioContext.currentTime);
+                this.gainNode.gain
