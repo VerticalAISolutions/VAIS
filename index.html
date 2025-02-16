@@ -1,176 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>Interactive Text</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
-
+    <meta charset="UTF-8">
+    <title>Triple Synthesizer with Freesound</title>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: #f4f8f2; /* Muted greenish background */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Poppins', sans-serif; /* Use Poppins font */
-            position: relative; /* Needed for absolute positioning of the shapes */
-        }
-
-        .word {
-            display: flex;
-            z-index: 2; /* Ensure text is above the shapes */
-            position: relative; /* Required for mousemove effect */
-        }
-
-        .letter {
-            font-size: 4em; /* Adjust size */
-            font-weight: 300; /* Thin typeface */
-            color: #558b2f; /* Light green text color */
-            transition: transform 0.2s ease, color 0.2s ease; /* Smooth animation */
-            margin: 0 0.1em;
-            position: relative;
-            animation: subtleMovement 3s infinite alternate; /* Constant letter movement */
-            display: inline-block;  /* Important: needed for individual letter transformations */
-        }
-
-        @keyframes subtleMovement {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-3px); } /* Small vertical movement */
-        }
-
-        /* Style for the container of the background shapes */
-        .background-shapes {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Hide shapes outside the container */
-            z-index: 1; /* Place the shapes behind the text */
-        }
-
-        .vertical-shape {
-            position: absolute;
-            width: 5px; /* Tiny shapes */
-            height: 20px; /* Tiny shapes */
-            background: linear-gradient(to bottom, #a5d6a7, #dcedc8); /* Gradient */
-            opacity: 0.5;
-            border-radius: 2px;
-            animation: moveShapes 20s linear infinite, pulse 5s infinite alternate;
-            /* Random starting position */
-            left: calc(var(--random-x) * 100%);
-            top: calc(var(--random-y) * 100%);
-        }
-
-        /* Added variables for left and top positions */
-        .vertical-shape {
-            --random-x: 0;
-            --random-y: 0;
-        }
-
-        @keyframes pulse {
-            0% {
-                opacity: 0.3;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0.7;
-                transform: scale(1.05); /* Slightly larger */
-            }
-        }
-
-        @keyframes moveShapes {
-            0% { transform: translateY(-20px); } /* Start above the viewport */
-            100% { transform: translateY(100vh); }
-        }
+        /* ... (Your existing CSS styles) ... */
     </style>
 </head>
 <body>
+    <div class="synth-container">
+        </div>
 
-<div class="background-shapes">
-    <!-- Dynamically add shapes here using JavaScript -->
-</div>
+    <div class="freesound-section">
+        </div>
 
-<div class="word">
-    <span class="letter">V</span>
-    <span class="letter">e</span>
-    <span class="letter">r</span>
-    <span class="letter">t</span>
-    <span class="letter">i</span>
-    <span class="letter">c</span>
-    <span class="letter">a</span>
-    <span class="letter">l</span>
-    <span class="letter"> </span>
-    <span class="letter">A</span>
-    <span class="letter">I</span>
-    <span class="letter"> </span>
-    <span class="letter">S</span>
-    <span class="letter">o</span>
-    <span class="letter">l</span>
-    <span class="letter">u</span>
-    <span class="letter">t</span>
-    <span class="letter">i</span>
-    <span class="letter">o</span>
-    <span class="letter">n</span>
-    <span class="letter">s</span>
-</div>
+    <script>
+        class Synthesizer {
+            constructor(id) {
+                this.id = id;
+                this.isPlaying = false;
+                this.currentWaveform = 'sine';
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                this.oscillator = null;
+                this.gainNode = null;
+                this.analyser = this.audioContext.createAnalyser();
+                this.analyser.fftSize = 2048;
+                this.bufferLength = this.analyser.frequencyBinCount;
+                this.dataArray = new Uint8Array(this.bufferLength);
+                this.visualizer = document.getElementById(`visualizer${this.id}`);
+                this.canvas = document.createElement('canvas');
+                this.canvasCtx = this.canvas.getContext('2d');
+                this.visualizer.appendChild(this.canvas);
+                this.canvas.width = this.visualizer.offsetWidth;
+                this.canvas.height = this.visualizer.offsetHeight;
 
-<script>
-    const letterElements = document.querySelectorAll(".letter");
-    const backgroundShapes = document.querySelector(".background-shapes");
-    const numShapes = 50; // Adjust for density
-    const word = document.querySelector(".word");
+                this.gainNode = this.audioContext.createGain();
+                this.gainNode.connect(this.analyser);
+                this.analyser.connect(this.audioContext.destination);
+                this.gainNode.gain.value = 0; // Initialize volume to 0
 
-    // Mouse move effect on word
-    word.addEventListener("mousemove", (e) => {
-        const x = e.clientX / 100;
-        const y = e.clientY / 100;
-
-        word.style.transform = `translate(${x}px, ${y}px)`;
-    });
-
-    // Original letter animation on hover
-    letterElements.forEach(letter => {
-        letter.addEventListener('mousemove', function(event) {
-            const rect = letter.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-
-            const dx = event.clientX - centerX;
-            const dy = event.clientY - centerY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 100) {
-                const scale = 1 + (100 - distance) * 0.005;
-                const translateX = dx * 0.05;
-                const translateY = dy * 0.05;
-
-                letter.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-            } else {
-                // Reset only the translation, keep scale 1
-                letter.style.transform = `translate(0, 0) scale(1)`;
+                this.setupEventListeners();
+                this.drawVisualizer();
             }
-        });
 
-        letter.addEventListener('mouseout', function() {
-            letter.style.transform = `translate(0, 0) scale(1)`; // Reset on mouseout too
-        });
-    });
+            createOscillator() {
+                if (this.oscillator) {
+                    this.oscillator.stop();
+                    this.oscillator.disconnect();
+                }
 
-    for (let i = 0; i < numShapes; i++) {
-        const shape = document.createElement('div');
-        shape.classList.add('vertical-shape');
+                this.oscillator = this.audioContext.createOscillator();
+                this.oscillator.type = this.currentWaveform;
+                this.oscillator.frequency.value = document.getElementById(`frequency${this.id}`).value;
+                this.oscillator.connect(this.gainNode); // Connect to gain node
 
-        // Assign random positions using CSS variables
-        shape.style.setProperty('--random-x', Math.random());
-        shape.style.setProperty('--random-y', Math.random());
+                // Smooth volume transition (using exponential ramp for better perceived smoothness)
+                this.gainNode.gain.setValueAtTime(0.0001, this.audioContext.currentTime); // A tiny value to avoid zero
+                this.gainNode.gain.exponentialRampToValueAtTime(1, this.audioContext.currentTime + 0.05); // Ramp up quickly
 
-        backgroundShapes.appendChild(shape);
-    }
-</script>
+                this.oscillator.start();
+            }
 
+            setupEventListeners() {
+                const playButton = document.getElementById(`playButton${this.id}`);
+                const frequencySlider = document.getElementById(`frequency${this.id}`);
+                const volumeSlider = document.getElementById(`volume${this.id}`);
+                const frequencyValue = document.getElementById(`frequencyValue${this.id}`);
+                const volumeValue = document.getElementById(`volumeValue${this.id}`);
+                const waveButtons = document.querySelectorAll(`.synth-${this.id} .button`);
+
+                playButton.addEventListener('click', () => {
+                    this.isPlaying = !this.isPlaying;
+                    playButton.textContent = this.isPlaying ? "Stop" : "Start";
+
+                    if (this.isPlaying) {
+                        this.createOscillator();
+                    } else {
+                        this.oscillator.stop();
+                        this.oscillator.disconnect();
+                        this.oscillator = null;
+                    }
+                });
+
+                frequencySlider.addEventListener('input', () => {
+                    if (this.oscillator) {
+                        this.oscillator.frequency.value = frequencySlider.value;
+                    }
+                    frequencyValue.textContent = `${frequencySlider.value} Hz`;
+                });
+
+                volumeSlider.addEventListener('input', () => {
+                    this.gainNode.gain.value = volumeSlider.value / 100;
+                    volumeValue.textContent = `${volumeSlider.value}%`;
+                });
+
+                waveButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        waveButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        this.currentWaveform = button.dataset.wave;
+                        if (this.isPlaying) {
+                            this.createOscillator(); // Recreate oscillator with new waveform
+                        }
+                    });
+                });
+            }
+
+            drawVisualizer() {
+                this.analyser.getByteTimeDomainData(this.dataArray);
+
+                this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.canvasCtx.beginPath();
+                const sliceWidth = this.canvas.width * 1.0 / this.bufferLength;
+                let x = 0;
+
+                for (let i = 0; i < this.bufferLength; i++) {
+                    const v = this.dataArray[i] / 128.0;
+                    const y = v * this.canvas.height / 2;
+
+                    if (i === 0) {
+                        this.canvasCtx.moveTo(x, y);
+                    } else {
+                        this.canvasCtx.lineTo(x, y);
+                    }
+
+                    x += sliceWidth;
+                }
+
+                this.canvasCtx.lineTo(this.canvas.width, this.canvas.height / 2); // Close the path
+                this.canvasCtx.strokeStyle = 'white'; // Set the color
+                this.canvasCtx.stroke();
+
+                requestAnimationFrame(() => this.drawVisualizer());
+            }
+        }
+
+
+        const synth1 = new Synthesizer(1);
+        const synth2 = new Synthesizer(2);
+        const synth3 = new Synthesizer(3);
+
+
+        // ... (Your Freesound API interaction code) ...
+    </script>
 </body>
 </html>
