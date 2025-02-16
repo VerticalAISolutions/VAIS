@@ -1,38 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Simple Tone</title>
-</head>
+    </head>
 <body>
+    <div class="synth-container">
+        </div>
 
-<button onclick="playSound()">Play Sound</button>
+    <div class="freesound-section">
+        </div>
 
-<script>
-function playSound() {
-  try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    <script>
+        class Synthesizer {
+            constructor(id) {
+                this.id = id;
+                // ... (rest of constructor - no changes)
+            }
 
-    oscillator.type = 'sine'; // or 'square', 'sawtooth', 'triangle'
-    oscillator.frequency.value = 440; // A4 frequency
-    gainNode.gain.value = 0.5; // Adjust volume (0 to 1)
+            createOscillator() {
+                console.log(`Synth ${this.id}: createOscillator() called`); // Check if function is called
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+                if (!this.audioContext) {
+                    console.log(`Synth ${this.id}: audioContext is null`); // Check audio context
+                    return;
+                }
 
-    oscillator.start();
+                if (this.oscillator) {
+                    console.log(`Synth ${this.id}: Stopping previous oscillator`);
+                    this.oscillator.stop();
+                    this.oscillator.disconnect();
+                }
 
-    setTimeout(() => { // Stop after 1 second
-      oscillator.stop();
-    }, 1000);
+                try {
+                    console.log(`Synth ${this.id}: Creating oscillator`);
+                    this.oscillator = this.audioContext.createOscillator();
+                    this.oscillator.type = this.currentWaveform;
+                    this.oscillator.frequency.value = document.getElementById(`frequency${this.id}`).value;
+                    this.oscillator.connect(this.gainNode);
 
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Error playing sound. Check the console (F12).");
-  }
-}
-</script>
+                    this.gainNode.gain.setValueAtTime(0.0001, this.audioContext.currentTime);
+                    this.gainNode.gain.exponentialRampToValueAtTime(1, this.audioContext.currentTime + 0.05);
 
+                    console.log(`Synth ${this.id}: Starting oscillator`);
+                    this.oscillator.start();
+
+                } catch (error) {
+                    console.error(`Synth ${this.id}: Error creating oscillator:`, error);
+                }
+            }
+
+            setupEventListeners() {
+                console.log(`Synth ${this.id}: setupEventListeners() called`); // Check if function is called
+
+                const playButton = document.getElementById(`playButton${this.id}`);
+                const frequencySlider = document.getElementById(`frequency${this.id}`);
+                const volumeSlider = document.getElementById(`volume${this.id}`);
+                const frequencyValue = document.getElementById(`frequencyValue${this.id}`);
+                const volumeValue = document.getElementById(`volumeValue${this.id}`);
+                const waveButtons = document.querySelectorAll(`.synth-${this.id} .button`);
+
+                if (!playButton || !frequencySlider || !volumeSlider || !frequencyValue || !volumeValue || !waveButtons) {
+                    console.error(`Synth ${this.id}: One or more elements are missing!`); // Check for missing elements
+                    return;
+                }
+
+                playButton.addEventListener('click', () => {
+                    console.log(`Synth ${this.id}: Play button clicked`); // Check if event listener works
+                    this.isPlaying = !this.isPlaying;
+                    playButton.textContent = this.isPlaying ? "Stop" : "Start";
+
+                    if (this.isPlaying) {
+                        this.createOscillator();
+                    } else {
+                        if (this.oscillator) {
+                            this.oscillator.stop();
+                            this.oscillator.disconnect();
+                            this.oscillator = null;
+                        }
+                    }
+                });
+
+                // ... (rest of your event listener code - add console.log statements as needed)
+            }
+
+            drawVisualizer() {
+                // ... (your visualizer code - add console.log statements as needed)
+            }
+        }
+
+        const synth1 = new Synthesizer(1);
+        const synth2 = new Synthesizer(2);
+        const synth3 = new Synthesizer(3);
+
+
+        // ... (Your Freesound API interaction code) ...
+    </script>
 </body>
 </html>
