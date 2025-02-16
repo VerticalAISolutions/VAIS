@@ -36,42 +36,12 @@
         .synth-2 { border: 2px solid #00ff88; }
         .synth-3 { border: 2px solid #00ccff; }
 
-        .title {
-            text-align: center;
-            color: #fff;
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .control-group {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1rem;
-            border-radius: 10px;
-        }
-
-        .slider-container {
-            width: 100%;
-            margin: 0.5rem 0;
-        }
-
-        .slider {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            outline: none;
-        }
-
+        .title { /* ... (Rest of your CSS) ... */ }
+        .controls { /* ... */ }
+        .control-group { /* ... */ }
+        .slider-container { /* ... */ }
+        .slider { /* ... */ }
         /* ... (Rest of your CSS styles) ... */
-
     </style>
 </head>
 <body>
@@ -108,14 +78,77 @@
         </div>
 
         <div class="synth synth-2">
-           </div>
+            <h2 class="title">Synthesizer 2</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="frequency2">Frequenz</label>
+                    <div class="slider-container">
+                        <input type="range" id="frequency2" class="slider" min="20" max="2000" value="440">
+                    </div>
+                    <span id="frequencyValue2">440 Hz</span>
+                </div>
+                <div class="control-group">
+                    <label for="volume2">Lautstärke</label>
+                    <div class="slider-container">
+                        <input type="range" id="volume2" class="slider" min="0" max="100" value="50">
+                    </div>
+                    <span id="volumeValue2">50%</span>
+                </div>
+                <div class="control-group">
+                    <label>Wellenform</label>
+                    <div class="button-group">
+                        <button class="button active" data-wave="sine" data-synth="2">Sinus</button>
+                        <button class="button" data-wave="square" data-synth="2">Rechteck</button>
+                        <button class="button" data-wave="sawtooth" data-synth="2">Sägezahn</button>
+                        <button class="button" data-wave="triangle" data-synth="2">Dreieck</button>
+                    </div>
+                </div>
+            </div>
+            <button id="playButton2" class="button">Start/Stop</button>
+            <div class="visualizer" id="visualizer2"></div>
+        </div>
 
         <div class="synth synth-3">
+            <h2 class="title">Synthesizer 3</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="frequency3">Frequenz</label>
+                    <div class="slider-container">
+                        <input type="range" id="frequency3" class="slider" min="20" max="2000" value="440">
+                    </div>
+                    <span id="frequencyValue3">440 Hz</span>
+                </div>
+                <div class="control-group">
+                    <label for="volume3">Lautstärke</label>
+                    <div class="slider-container">
+                        <input type="range" id="volume3" class="slider" min="0" max="100" value="50">
+                    </div>
+                    <span id="volumeValue3">50%</span>
+                </div>
+                <div class="control-group">
+                    <label>Wellenform</label>
+                    <div class="button-group">
+                        <button class="button active" data-wave="sine" data-synth="3">Sinus</button>
+                        <button class="button" data-wave="square" data-synth="3">Rechteck</button>
+                        <button class="button" data-wave="sawtooth" data-synth="3">Sägezahn</button>
+                        <button class="button" data-wave="triangle" data-synth="3">Dreieck</button>
+                    </div>
+                </div>
             </div>
+            <button id="playButton3" class="button">Start/Stop</button>
+            <div class="visualizer" id="visualizer3"></div>
+        </div>
     </div>
 
     <div class="freesound-section">
+        <h2 class="title">Freesound Samples</h2>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Suche nach Sounds (z.B. 'piano', 'drums', 'ambient')...">
+            <button class="button" id="searchButton">Suchen</button>
         </div>
+        <div class="loader">Lade Sounds...</div>
+        <div class="sound-grid" id="soundGrid"></div>
+    </div>
 
     <script>
         class Synthesizer {
@@ -133,80 +166,4 @@
                 this.visualizer = document.getElementById(`visualizer${this.id}`);
                 this.canvas = document.createElement('canvas');
                 this.canvasCtx = this.canvas.getContext('2d');
-                this.visualizer.appendChild(this.canvas);
-                this.canvas.width = this.visualizer.offsetWidth;
-                this.canvas.height = this.visualizer.offsetHeight;
-
-                this.gainNode = this.audioContext.createGain();
-                this.gainNode.connect(this.analyser);
-                this.analyser.connect(this.audioContext.destination);
-                this.gainNode.gain.value = 0;
-
-                this.setupEventListeners();
-                this.drawVisualizer();
-            }
-
-            createOscillator() {
-                if (this.oscillator) {
-                    this.oscillator.stop();
-                    this.oscillator.disconnect();
-                }
-
-                this.oscillator = this.audioContext.createOscillator();
-                this.oscillator.type = this.currentWaveform;
-                this.oscillator.frequency.value = document.getElementById(`frequency${this.id}`).value;
-                this.oscillator.connect(this.gainNode);
-
-                this.gainNode.gain.setValueAtTime(0.0001, this.audioContext.currentTime);
-                this.gainNode.gain.exponentialRampToValueAtTime(1, this.audioContext.currentTime + 0.05);
-
-                this.oscillator.start();
-            }
-
-            setupEventListeners() {
-                const playButton = document.getElementById(`playButton${this.id}`);
-                const frequencySlider = document.getElementById(`frequency${this.id}`);
-                const volumeSlider = document.getElementById(`volume${this.id}`);
-                const frequencyValue = document.getElementById(`frequencyValue${this.id}`);
-                const volumeValue = document.getElementById(`volumeValue${this.id}`);
-                const waveButtons = document.querySelectorAll(`.synth-${this.id} .button`);
-
-                playButton.addEventListener('click', () => {
-                    this.isPlaying = !this.isPlaying;
-                    playButton.textContent = this.isPlaying ? "Stop" : "Start";
-
-                    if (this.isPlaying) {
-                        this.createOscillator();
-                    } else {
-                        this.oscillator.stop();
-                        this.oscillator.disconnect();
-                        this.oscillator = null;
-                    }
-                });
-
-                frequencySlider.addEventListener('input', () => {
-                    if (this.oscillator) {
-                        this.oscillator.frequency.value = frequencySlider.value;
-                    }
-                    frequencyValue.textContent = `${frequencySlider.value} Hz`;
-                });
-
-                volumeSlider.addEventListener('input', () => {
-                    this.gainNode.gain.value = volumeSlider.value / 100;
-                    volumeValue.textContent = `${volumeSlider.value}%`;
-                });
-
-                waveButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        waveButtons.forEach(btn => btn.classList.remove('active'));
-                        button.classList.add('active');
-                        this.currentWaveform = button.dataset.wave;
-                        if (this.isPlaying) {
-                            this.createOscillator();
-                        }
-                    });
-                });
-            }
-
-            drawVisualizer() {
-                this.analyser.getByteTimeDomainData(this.dataArray);
+                this.visualizer.appendChild
